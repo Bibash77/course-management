@@ -1,0 +1,28 @@
+<h2>Assignments for {{student.name}}</h2>
+<table class="table">
+    <tr>
+        <th>Assignment</th>
+        <th>Score</th>
+        <th>Actions</th>
+    </tr>
+    {{#each student.assignments}}
+    <tr>
+        <td>{{this.name}}</td>
+        <td>{{this.score}}</td>
+        <td>
+            <a href="/assignments/delete/{{this._id}}" class="btn btn-danger">Delete</a>
+        </td>
+    </tr>
+    {{/each}}
+</table>
+
+<h3>Add New Assignment</h3>
+<form action="/assignments/{{student._id}}" method="POST">
+    <label>Assignment Name</label>
+    <input type="text" name="name" required>
+    
+    <label>Score</label>
+    <input type="number" name="score" required>
+
+    <button type="submit">Add</button>
+</form>

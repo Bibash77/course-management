@@ -1,0 +1,92 @@
+<!-- views/marks/manageMarks.handlebars -->
+{{> header}}
+
+<h1>Manage Marks for Students</h1>
+
+<!-- Marks Table -->
+<table class="marks-table">
+    <thead>
+        <tr>
+            <th>Student</th>
+            {{#each assignments}}
+                <th>{{this.title}}</th>
+            {{/each}}
+            <th>Total</th>
+            <th>Percentage</th>
+            <th>Average</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each students}}
+        <tr>
+            <td>{{this.name}}</td>
+            {{#each assignments}}
+            <td class="marks-cell" data-student-id="{{this.student._id}}" data-assignment-id="{{this._id}}">
+                {{#if (lookup this.student.marks this._id)}}
+                    {{lookup this.student.marks this._id}.score}
+                {{else}}
+                    0
+                {{/if}}
+            </td>
+            {{/each}}
+            <td>{{calculateTotalScore this}}</td>
+            <td>{{calculatePercentage this}}</td>
+            <td>{{calculateAverage this}}</td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
+
+<!-- Modal for Editing Marks -->
+<div id="editMarksModal" class="modal">
+    <div class="modal-content">
+        <h4>Update Marks</h4>
+        <form id="updateMarksForm">
+            <label for="score">Score:</label>
+            <input type="number" id="score" name="score">
+            <label for="note">Note:</label>
+            <textarea id="note" name="note"></textarea>
+            <button type="submit">Save</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Handle cell click to open modal for editing marks
+    document.querySelectorAll('.marks-cell').forEach(cell => {
+        cell.addEventListener('click', function() {
+            const studentId = this.dataset.studentId;
+            const assignmentId = this.dataset.assignmentId;
+            
+            // Fetch existing marks data for the student and assignment
+            fetch(`/marks/${studentId}?assignmentId=${assignmentId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('score').value = data.score;
+                    document.getElementById('note').value = data.note;
+                    document.getElementById('editMarksModal').style.display = 'block';
+                });
+        });
+    });
+
+    // Handle form submission to update marks
+    document.getElementById('updateMarksForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const score = document.getElementById('score').value;
+        const note = document.getElementById('note').value;
+        const markId = document.querySelector('.marks-cell').dataset.id;
+
+        // Send the updated data to the server
+        fetch(`/marks/${markId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ score, note }),
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('editMarksModal').style.display = 'none';
+            // Dynamically update the table (optional, or re-fetch data)
+        });
+    });
+</script>

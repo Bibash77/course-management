@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Marks</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Improve the modal size and make it compact */
+        .modal-dialog {
+            max-width: 500px;
+        }
+
+        .marks-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .marks-row label {
+            flex: 1;
+        }
+
+        .marks-row input {
+            width: 100px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h2>Manage Student Marks</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Roll No</th>
+                    <th>Name</th>
+                    {{#each assignments}}
+                    <th>{{this.title}}</th>
+                    {{/each}}
+                    <th>Average Score</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each students}}
+                <tr>
+                    <td>{{this.roll_no}}</td>
+                    <td>{{this.name}}</td>
+                    {{#each assignments}}
+                    <td>
+                        {{#with (lookup ../this.assignments @index)}}
+                        {{#if this.score}}{{this.score}}{{else}}NA{{/if}}
+                        {{/with}}
+                    </td>
+                    {{/each}}
+                    <td>{{this.averageScore}}%</td>
+                    <td>
+                        <button class="btn btn-primary amend-marks-btn" data-student-id="{{this._id}}"
+                            data-student-name="{{this.name}}">
+                            Amend Marks
+                        </button>
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal for Amending Marks -->
+    <div class="modal fade" id="amendMarksModal" tabindex="-1" aria-labelledby="amendMarksModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Amend Marks</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="amendMarksForm">
+                        <input type="hidden" id="studentId">
+                        <div class="mb-3">
+                            <label>Student</label>
+                            <input type="text" id="studentName" class="form-control" readonly>
+                        </div>
+
+                        <!-- Marks Fields for Each Assignment -->
+                        <div id="marksFields" class="mb-3">
+                            <!-- Dynamic fields will be added here -->
+                        </div>
+
+                        <button type="submit" class="btn btn-success">Save</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let modal = new bootstrap.Modal(document.getElementById("amendMarksModal"));
+
+            document.querySelectorAll(".amend-marks-btn").forEach(button => {
+                button.addEventListener("click", async function () {
+                    const studentId = this.getAttribute("data-student-id");
+                    const studentName = this.getAttribute("data-student-name");
+                    document.getElementById("studentId").value = studentId;
+                    document.getElementById("studentName").value = studentName;
+
+                    const marksFieldsContainer = document.getElementById("marksFields");
+                    marksFieldsContainer.innerHTML = ''; // Clear previous fields
+
+                    try {
+                        // Fetch assignments for the student
+                        const response = await fetch(`/students/marks/${studentId}`);
+                        const data = await response.json();
+                        const { studentName, assignments } = data;
+
+                        // Create input fields for each assignment
+                        assignments.forEach(assignment => {
+                            const fieldHTML = `
+        <div class="marks-row mb-3">
+            <label for="marks[${assignment.assignmentId}]">${assignment.title}</label>
+            <input type="number" name="marks[${assignment.assignmentId}]" class="form-control" 
+                value="${assignment.score}" placeholder="Enter marks">
+        </div>
+    `;
+                            marksFieldsContainer.insertAdjacentHTML('beforeend', fieldHTML);
+                        });
+
+
+                    } catch (error) {
+                        console.error("Error loading assignments or marks:", error);
+                    }
+
+                    modal.show();
+                });
+            });
+
+            document.getElementById("amendMarksForm").addEventListener("submit", async function (event) {
+                event.preventDefault();
+                const studentId = document.getElementById("studentId").value;
+                const formData = new FormData(this);
+                const assignments = [];
+
+                formData.forEach((value, key) => {
+                    const match = key.match(/marks\[(.+?)\]/);
+                    if (match) {
+                        assignments.push({ assignmentId: match[1], score: Number(value) || 0 });
+                    }
+                });
+
+                try {
+                    const response = await fetch("/students/marks/bulk-update", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ studentId, assignments })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("Failed to update marks.");
+                    }
+
+                    location.reload();
+                } catch (error) {
+                    alert("Failed to update marks.");
+                    console.error(error);
+                }
+            });
+
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,31 @@
+<div class="container mt-4">
+    <h2>Edit Assignment</h2>
+    <form action="/assignments/edit/{{assignment._id}}?_method=PUT" method="POST">
+        <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input type="text" name="title" class="form-control" value="{{assignment.title}}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea id="editor" name="description">{{assignment.description}}</textarea>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Due Date {{assignment.dueDate}}</label>
+            <input type="date" name="dueDate" class="form-control" value="{{assignment.dueDate}}" required>
+        </div>
+        <button type="submit" class="btn btn-success">Update Assignment</button>
+    </form>
+</div>
+
+<!-- Include CKEditor from CDN -->
+<script src="https://cdn.ckeditor.com/ckeditor5/36.0.1/classic/ckeditor.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const editorElement = document.querySelector("#editor");
+    if (editorElement) {
+        ClassicEditor.create(editorElement)
+            .catch(error => console.error("CKEditor Error:", error));
+    }
+});
+</script>

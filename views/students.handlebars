@@ -1,0 +1,50 @@
+<h2>Student Marksheet</h2>
+<table class="table">
+    <tr>
+        <th>Name</th>
+        <th>Roll No</th>
+        <th>Symbol No</th>
+        <th>Assignments</th>
+        <th>Average Score</th>
+        <th>Actions</th>
+    </tr>
+    {{#each students}}
+    <tr>
+        <td>{{this.name}}</td>
+        <td>{{this.roll_no}}</td>
+        <td>{{this.symbol_no}}</td>
+        <td>
+            <table>
+                {{#each this.assignments}}
+                <tr>
+                    <td>{{this.name}}</td>
+                    <td>
+                        <form action="/assignments/update/{{this._id}}" method="POST">
+                            <select name="score" onchange="this.form.submit()">
+                                <option value="0" {{#if (eq this.score 0)}}selected{{/if}}>0</option>
+                                <option value="25" {{#if (eq this.score 25)}}selected{{/if}}>25</option>
+                                <option value="50" {{#if (eq this.score 50)}}selected{{/if}}>50</option>
+                                <option value="75" {{#if (eq this.score 75)}}selected{{/if}}>75</option>
+                                <option value="100" {{#if (eq this.score 100)}}selected{{/if}}>100</option>
+                            </select>
+                        </form>
+                    </td>
+                </tr>
+                {{/each}}
+            </table>
+        </td>
+        <td>
+            {{#if this.assignments.length}}
+                {{average this.assignments}}
+            {{else}}
+                N/A
+            {{/if}}
+        </td>
+        <td>
+            <a href="/students/edit/{{this._id}}" class="btn btn-warning">Edit</a>
+            <a href="/students/delete/{{this._id}}" class="btn btn-danger">Delete</a>
+        </td>
+    </tr>
+    {{/each}}
+</table>
+<a href="/students/add" class="btn btn-primary">Add Student</a>

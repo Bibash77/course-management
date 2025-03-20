@@ -1,0 +1,30 @@
+<div class="container mt-4">
+    <h2>Add Assignment</h2>
+    <form action="/assignments/add" method="POST">
+        <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input type="text" name="title" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" id="editor" class="form-control"></textarea>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Due Date</label>
+            <input type="date" name="dueDate" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Assignment</button>
+    </form>
+</div>
+
+<!-- Include CKEditor from CDN -->
+<script src="https://cdn.ckeditor.com/ckeditor5/36.0.1/classic/ckeditor.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const editorElement = document.querySelector("#editor");
+    if (editorElement) {
+        ClassicEditor.create(editorElement).catch(error => console.error("CKEditor Error:", error));
+    }
+});
+</script>

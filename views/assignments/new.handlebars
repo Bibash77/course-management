@@ -1,0 +1,26 @@
+<h2>Add Assignment</h2>
+<form action="/assignments" method="POST">
+    <div class="mb-3">
+        <label>Student</label>
+        <select name="student" class="form-control" required>
+            {{#each students}}
+            <option value="{{_id}}">{{name}}</option>
+            {{/each}}
+        </select>
+    </div>
+    <div class="mb-3">
+        <label>Title</label>
+        <input type="text" name="title" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label>Score</label>
+        <select name="score" class="form-control">
+            <option>0</option>
+            <option>25</option>
+            <option>50</option>
+            <option>75</option>
+            <option>100</option>
+        </select>
+    </div>
+    <button class="btn btn-success">Save</button>
+</form>

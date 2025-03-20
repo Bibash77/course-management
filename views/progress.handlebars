@@ -1,0 +1,21 @@
+<h2>Course Progress: {{course.title}}</h2>
+<ul class="list-group">
+  {{#each course.topics}}
+    <li class="list-group-item d-flex justify-content-between">
+      <div>
+        <strong>{{title}}</strong>
+        {{#if studyMaterial}}
+          <br><a href="{{studyMaterial}}" target="_blank">Study Material 📖</a>
+        {{/if}}
+      </div>
+      <form action="/courses/progress/{{../course._id}}" method="POST">
+        <input type="hidden" name="topicIndex" value="{{@index}}">
+        <button type="submit" class="btn {{#if completed}}btn-success{{else}}btn-secondary{{/if}}">
+          {{#if completed}}✓ Completed{{else}}Mark Complete{{/if}}
+        </button>
+      </form>
+    </li>
+  {{/each}}
+</ul>
+
+<a href="/courses" class="btn btn-primary mt-3">Back to Courses</a>

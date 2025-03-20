@@ -1,0 +1,34 @@
+<style>
+    .card .due-date {
+    font-size: 1.1rem;
+    color: #333;
+    margin-top: 15px;
+}
+
+.card .days-left {
+    font-size: 1rem;
+    color: #ff6347; /* A red color to highlight the days left */
+    font-weight: bold;
+}
+
+</style>
+<h2>Upcoming Assignments</h2>
+
+{{#if assignments.length}}
+    <div class="board">
+        {{#each assignments}}
+            <div class="card">
+                <h3>{{this.title}}</h3>
+                <div class="description">
+                    {{{this.description}}} <!-- Render CKEditor content safely -->
+                </div>
+                <p class="due-date">
+                    Due Date: {{formatDate this.dueDate}} 
+                    <span class="days-left">({{daysLeft this.dueDate}} days left)</span>
+                </p>
+            </div>
+        {{/each}}
+    </div>
+{{else}}
+    <p>No upcoming assignments.</p>
+{{/if}}

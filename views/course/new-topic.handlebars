@@ -1,0 +1,12 @@
+<h1>Add Topic for {{course.title}}</h1>
+<form action="/courses/{{course._id}}/topics" method="POST">
+  <div class="form-group">
+    <label>Topic Title</label>
+    <input type="text" name="title" class="form-control" required>
+  </div>
+  <div class="form-group">
+    <label>Study Material (Google Doc URL)</label>
+    <input type="text" name="studyMaterial" class="form-control">
+  </div>
+  <button type="submit" class="btn btn-success">Add Topic</button>
+</form>

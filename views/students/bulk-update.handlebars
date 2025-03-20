@@ -1,0 +1,15 @@
+<div class="container mt-4">
+    <h2>Bulk Update Students</h2>
+    <form action="/students/bulk-update" method="POST">
+        <div class="mb-3">
+            <label class="form-label">Paste JSON Data</label>
+            <textarea name="studentsJson" class="form-control" rows="10" required>
+[
+    {"name": "John Doe", "roll_no": "101", "symbol_no": "S101"},
+    {"name": "Jane Smith", "roll_no": "102", "symbol_no": "S102"}
+]
+            </textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Update Students</button>
+    </form>
+</div>

@@ -1,0 +1,47 @@
+<div class="container mt-4">
+    <h2>Student List</h2>
+    <a href="/students/add" class="btn btn-success mb-3">Add Student</a>
+    <a href="/students/bulk-update" class="btn btn-info mb-3">Bulk Update Students</a>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Roll No</th>
+                <th>Symbol No</th>
+                <th>Assignments</th>
+                <th>Average Score</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each students}}
+            <tr>
+                <td>{{this.name}}</td>
+                <td>{{this.roll_no}}</td>
+                <td>{{this.symbol_no}}</td>
+                <td>
+                    {{#each this.assignments}}
+                        {{this.score}} 
+                    {{else}}
+                        No assignments
+                    {{/each}}
+                </td>
+                <td>
+                    {{#if this.assignments.length}}
+                        {{average this.assignments}}
+                    {{else}}
+                        N/A
+                    {{/if}}
+                </td>
+                <td>
+                    <a href="/students/edit/{{this._id}}" class="btn btn-warning">Edit</a>
+                    <form action="/students/{{this._id}}?_method=DELETE" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>

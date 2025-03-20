@@ -1,0 +1,16 @@
+<h2>Edit Student</h2>
+<form action="/{{student._id}}" method="POST" class="mt-3">
+    <div class="mb-3">
+        <label class="form-label">Student Name</label>
+        <input type="text" name="name" class="form-control" value="{{student.name}}" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Roll Number</label>
+        <input type="text" name="roll_no" class="form-control" value="{{student.roll_no}}" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Symbol Number</label>
+        <input type="text" name="symbol_no" class="form-control" value="{{student.symbol_no}}" required>
+    </div>
+    <button type="submit" class="btn btn-warning">Update Student</button>
+</form>

@@ -1,0 +1,43 @@
+<h1>{{course.title}} ({{course.code}})</h1>
+<a href="/courses" class="btn btn-secondary">Back to Courses</a>
+<a href="/courses/{{course._id}}/new-topic" class="btn btn-primary">Add Topic</a>
+
+<h3>Progress</h3>
+<p>Completed: {{completedCount}} / {{totalTopics}}</p>
+
+<table class="table mt-3">
+  <thead>
+    <tr>
+      <th>Topic</th>
+      <th>Status</th>
+      <th>Study Material</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each course.topics}}
+      <tr>
+        <td>{{this.title}}</td>
+        <td>
+          <form action="/courses/{{../course._id}}/topics/{{this._id}}?_method=PUT" method="POST">
+            <button class="btn {{#if this.completed}}btn-success{{else}}btn-warning{{/if}} btn-sm">
+              {{#if this.completed}}Completed{{else}}Mark Complete{{/if}}
+            </button>
+          </form>
+        </td>
+        <td>
+          {{#if this.studyMaterial}}
+            <a href="{{this.studyMaterial}}" target="_blank" class="btn btn-info btn-sm">Open</a>
+          {{else}}
+            No Material
+          {{/if}}
+        </td>
+        <td>
+          <form action="/courses/{{../course._id}}/topics/{{this._id}}?_method=DELETE" method="POST">
+            <button class="btn btn-danger btn-sm">Remove</button>
+          </form>
+        </td>
+      </tr>
+    {{/each}}
+  </tbody>
+</table>
