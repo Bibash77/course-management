@@ -1,49 +1,68 @@
 {{!-- views/home.handlebars --}}
-<div class="container mt-5">
-    <h1 class="text-center mb-4">Student Evaluation System</h1>
-    <div class="row">
+<div class="welcome-section text-center">
+    <h1 class="display-4 mb-3">Welcome to Student Evaluation System</h1>
+    <p class="lead">Manage your academic records efficiently</p>
+</div>
+
+<div class="container">
+    <div class="row g-4">
         <div class="col-md-4">
-            <div class="card">
-                <div class="card-body text-center">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-users card-icon"></i>
                     <h5 class="card-title">Manage Students</h5>
-                    <p class="card-text">Add, view, and manage student records.</p>
-                    <a href="/students" class="btn btn-primary">Go to Students</a>
+                    <p class="card-text">Add, view, and manage student records with ease.</p>
+                    <a href="/students" class="btn btn-primary">
+                        <i class="fas fa-arrow-right me-2"></i>Go to Students
+                    </a>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card">
-                <div class="card-body text-center">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-tasks card-icon"></i>
                     <h5 class="card-title">Manage Assignments</h5>
-                    <p class="card-text">Create and track student assignments.</p>
-                    <a href="/assignments" class="btn btn-primary">Go to Assignments</a>
+                    <p class="card-text">Create and track student assignments efficiently.</p>
+                    <a href="/assignments" class="btn btn-primary">
+                        <i class="fas fa-arrow-right me-2"></i>Go to Assignments
+                    </a>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card">
-                <div class="card-body text-center">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-chart-bar card-icon"></i>
                     <h5 class="card-title">Manage Marks</h5>
-                    <p class="card-text">View and update student grades.</p>
-                    <a href="/marks" class="btn btn-primary">Go to Marks</a>
+                    <p class="card-text">View and update student grades with detailed analytics.</p>
+                    <a href="/marks" class="btn btn-primary">
+                        <i class="fas fa-arrow-right me-2"></i>Go to Marks
+                    </a>
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mt-4">
-            <div class="card">
-                <div class="card-body text-center">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-clock card-icon"></i>
                     <h5 class="card-title">Pending Assignments</h5>
-                    <p class="card-text">View Pending Assignments and Due Date</p>
-                    <a href="/students/assignments" class="btn btn-primary">Go to Pending Assignments</a>
+                    <p class="card-text">Track pending assignments and their due dates.</p>
+                    <a href="/students/assignments" class="btn btn-primary">
+                        <i class="fas fa-arrow-right me-2"></i>View Pending
+                    </a>
                 </div>
             </div>
         </div>
-         <div class="col-md-4 mt-4">
-            <div class="card">
-                <div class="card-body text-center">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-book card-icon"></i>
                     <h5 class="card-title">Manage Courses</h5>
-                    <p class="card-text">Manage Courses And Study Materials</p>
-                    <a href="/courses" class="btn btn-primary">Go to Courses</a>
+                    <p class="card-text">Organize courses and study materials effectively.</p>
+                    <a href="/courses" class="btn btn-primary">
+                        <i class="fas fa-arrow-right me-2"></i>Go to Courses
+                    </a>
                 </div>
             </div>
         </div>
