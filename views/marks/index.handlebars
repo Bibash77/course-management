@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Marks</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         /* Improve the modal size and make it compact */
         .modal-dialog {
@@ -29,48 +30,123 @@
 </head>
 
 <body>
-    <div class="container mt-5">
-        <h2>Manage Student Marks</h2>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Roll No</th>
-                    <th>Name</th>
-                    {{#each assignments}}
-                    <th>{{this.title}}</th>
-                    {{/each}}
-                    <th>Average Score</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{#each students}}
-                <tr>
-                    <td>{{this.roll_no}}</td>
-                    <td>{{this.name}}</td>
-                    {{#each assignments}}
-                    <td>
-                        {{#with (lookup ../this.assignments @index)}}
-                        {{#if this.score}}{{this.score}}{{else}}NA{{/if}}
-                        {{/with}}
-                    </td>
-                    {{/each}}
-                    <td>{{this.averageScore}}%</td>
-                    <td>
-                        <button class="btn btn-primary amend-marks-btn" data-student-id="{{this._id}}"
-                            data-student-name="{{this.name}}">
-                            Amend Marks
+    <div class="container-fluid p-0 m-0 vh-100">
+        <!-- Header Section -->
+        <div class="welcome-section text-center">
+            <div class="container-fluid position-relative">
+                <a href="/" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to Home</span>
+                </a>
+                <h1 class="display-4 mb-3">Manage Student Marks</h1>
+                <p class="lead">Track and update student performance</p>
+            </div>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div class="container-fluid px-4">
+            <!-- Search and Filter Section -->
+            <div class="search-filter-section mb-4">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchInput" placeholder="Search by name or roll no...">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="scoreFilter">
+                            <option value="">Filter by Average Score</option>
+                            <option value="90-100">90-100% (Excellent)</option>
+                            <option value="80-89">80-89% (Good)</option>
+                            <option value="70-79">70-79% (Fair)</option>
+                            <option value="60-69">60-69% (Poor)</option>
+                            <option value="0-59">Below 60% (Fail)</option>
+                            <option value="no-score">No Score</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="assignmentFilter">
+                            <option value="">Filter by Assignment Count</option>
+                            <option value="5+">5+ Assignments</option>
+                            <option value="3-4">3-4 Assignments</option>
+                            <option value="1-2">1-2 Assignments</option>
+                            <option value="0">No Assignments</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-outline-secondary w-100" id="resetFilters">
+                            <i class="fas fa-sync-alt me-2"></i>Reset
                         </button>
-                    </td>
-                </tr>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Marks Grid -->
+            <div class="student-marks-grid">
+                {{#each students}}
+                <div class="student-marks-card" 
+                     data-name="{{this.name}}"
+                     data-roll="{{this.roll_no}}"
+                     data-score="{{this.averageScore}}"
+                     data-assignments="{{this.assignments.length}}">
+                    <div class="student-profile">
+                        <div class="profile-icon">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <div class="student-info">
+                            <h3 class="student-name">{{this.name}}</h3>
+                            <div class="student-details">
+                                <span class="detail-item">
+                                    <i class="fas fa-id-card"></i>
+                                    Roll No: {{this.roll_no}}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="marks-summary">
+                        <div class="summary-item">
+                            <span class="label">Total Assignments</span>
+                            <span class="value">{{this.assignments.length}}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Average Score</span>
+                            <span class="value score-badge {{#if this.averageScore}}{{#if (gte this.averageScore 90)}}score-excellent{{else if (gte this.averageScore 80)}}score-good{{else if (gte this.averageScore 70)}}score-fair{{else if (gte this.averageScore 60)}}score-poor{{else}}score-fail{{/if}}{{/if}}">
+                                {{#if this.averageScore}}{{this.averageScore}}%{{else}}N/A{{/if}}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="assignment-marks">
+                        {{#each ../assignments}}
+                        {{#with (lookup ../this.assignments @index)}}
+                        <div class="assignment-item">
+                            <span class="assignment-title">{{../this.title}}</span>
+                            <span class="assignment-score {{#if this}}{{#if (gte this.score 90)}}score-excellent{{else if (gte this.score 80)}}score-good{{else if (gte this.score 70)}}score-fair{{else if (gte this.score 60)}}score-poor{{else}}score-fail{{/if}}{{/if}}">
+                                {{#if this}}{{this.score}}{{else}}0{{/if}}
+                            </span>
+                        </div>
+                        {{/with}}
+                        {{/each}}
+                    </div>
+
+                    <div class="marks-actions">
+                        <button class="btn btn-primary action-btn amend-marks-btn" 
+                                data-student-id="{{this._id}}"
+                                data-student-name="{{this.name}}">
+                            <i class="fas fa-edit"></i>
+                            <span>Amend Marks</span>
+                        </button>
+                    </div>
+                </div>
                 {{/each}}
-            </tbody>
-        </table>
+            </div>
+        </div>
     </div>
 
     <!-- Modal for Amending Marks -->
-    <div class="modal fade" id="amendMarksModal" tabindex="-1" aria-labelledby="amendMarksModalLabel"
-        aria-hidden="true">
+    <div class="modal fade" id="amendMarksModal" tabindex="-1" aria-labelledby="amendMarksModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -84,24 +160,453 @@
                             <label>Student</label>
                             <input type="text" id="studentName" class="form-control" readonly>
                         </div>
-
-                        <!-- Marks Fields for Each Assignment -->
                         <div id="marksFields" class="mb-3">
                             <!-- Dynamic fields will be added here -->
                         </div>
-
-                        <button type="submit" class="btn btn-success">Save</button>
+                        <button type="submit" class="btn btn-success">Save Changes</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #6c757d;
+            --border-color: rgba(0,0,0,0.1);
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 15px rgba(0,0,0,0.15);
+            --transition: all 0.3s ease;
+        }
+
+        .welcome-section {
+            background: var(--primary-color);
+            color: white;
+            padding: 4rem 0;
+            margin: 0;
+            width: 100%;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 3rem;
+        }
+
+        .back-button {
+            position: absolute;
+            right: 2rem;
+            top: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: var(--transition);
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .student-marks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem 0;
+        }
+
+        .student-marks-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .student-marks-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .student-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .profile-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(44, 62, 80, 0.05);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .student-info {
+            flex: 1;
+        }
+
+        .student-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .student-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .detail-item i {
+            color: var(--primary-color);
+            opacity: 0.8;
+        }
+
+        .marks-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(44, 62, 80, 0.02);
+            border-radius: 8px;
+        }
+
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .summary-item .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+        }
+
+        .summary-item .value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .assignment-marks {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .assignment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: rgba(44, 62, 80, 0.02);
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+
+        .assignment-item:hover {
+            background: rgba(44, 62, 80, 0.05);
+        }
+
+        .assignment-title {
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            flex: 1;
+            margin-right: 1rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .assignment-score {
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            min-width: 45px;
+            text-align: center;
+        }
+
+        .assignment-score.score-excellent {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        .assignment-score.score-good {
+            background: rgba(0, 123, 255, 0.1);
+            color: #007bff;
+        }
+
+        .assignment-score.score-fair {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+
+        .assignment-score.score-poor {
+            background: rgba(255, 152, 0, 0.1);
+            color: #ff9800;
+        }
+
+        .assignment-score.score-fail {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
+        .marks-actions {
+            margin-top: auto;
+        }
+
+        .action-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            transition: var(--transition);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .score-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .score-excellent {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        .score-good {
+            background: rgba(0, 123, 255, 0.1);
+            color: #007bff;
+        }
+
+        .score-fair {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+
+        .score-poor {
+            background: rgba(255, 152, 0, 0.1);
+            color: #ff9800;
+        }
+
+        .score-fail {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
+        .search-filter-section {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .search-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1);
+        }
+
+        .form-select {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: var(--transition);
+            background-color: var(--card-bg);
+        }
+
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1a252f;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            border: none;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #2980b9;
+            color: white;
+        }
+
+        .btn-outline-secondary {
+            border-color: var(--secondary-color);
+            color: var(--secondary-color);
+        }
+
+        .btn-outline-secondary:hover {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .back-button {
+                position: static;
+                transform: none;
+                display: inline-flex;
+                margin-bottom: 1rem;
+                margin-top: 1rem;
+            }
+
+            .back-button:hover {
+                transform: translateX(5px);
+            }
+
+            .student-marks-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            let modal = new bootstrap.Modal(document.getElementById("amendMarksModal"));
+            const searchInput = document.getElementById('searchInput');
+            const scoreFilter = document.getElementById('scoreFilter');
+            const assignmentFilter = document.getElementById('assignmentFilter');
+            const resetFilters = document.getElementById('resetFilters');
+            const studentCards = document.querySelectorAll('.student-marks-card');
+            const modal = new bootstrap.Modal(document.getElementById("amendMarksModal"));
 
+            // Filtering functionality
+            function filterStudents() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const scoreRange = scoreFilter.value;
+                const assignmentCount = assignmentFilter.value;
+
+                studentCards.forEach(card => {
+                    const name = card.dataset.name.toLowerCase();
+                    const roll = card.dataset.roll.toLowerCase();
+                    const score = parseFloat(card.dataset.score);
+                    const assignments = parseInt(card.dataset.assignments);
+
+                    let matchesSearch = name.includes(searchTerm) || 
+                                     roll.includes(searchTerm);
+
+                    let matchesScore = true;
+                    if (scoreRange) {
+                        if (scoreRange === 'no-score') {
+                            matchesScore = score === 0;
+                        } else {
+                            const [min, max] = scoreRange.split('-').map(Number);
+                            matchesScore = score >= min && score <= max;
+                        }
+                    }
+
+                    let matchesAssignments = true;
+                    if (assignmentCount) {
+                        if (assignmentCount === '0') {
+                            matchesAssignments = assignments === 0;
+                        } else if (assignmentCount === '5+') {
+                            matchesAssignments = assignments >= 5;
+                        } else {
+                            const [min, max] = assignmentCount.split('-').map(Number);
+                            matchesAssignments = assignments >= min && assignments <= max;
+                        }
+                    }
+
+                    card.style.display = matchesSearch && matchesScore && matchesAssignments ? 'flex' : 'none';
+                });
+            }
+
+            // Add event listeners for real-time filtering
+            searchInput.addEventListener('input', filterStudents);
+            scoreFilter.addEventListener('change', filterStudents);
+            assignmentFilter.addEventListener('change', filterStudents);
+
+            // Reset all filters
+            resetFilters.addEventListener('click', function() {
+                searchInput.value = '';
+                scoreFilter.value = '';
+                assignmentFilter.value = '';
+                studentCards.forEach(card => card.style.display = 'flex');
+            });
+
+            // Marks amendment functionality
             document.querySelectorAll(".amend-marks-btn").forEach(button => {
                 button.addEventListener("click", async function () {
                     const studentId = this.getAttribute("data-student-id");
@@ -110,32 +615,28 @@
                     document.getElementById("studentName").value = studentName;
 
                     const marksFieldsContainer = document.getElementById("marksFields");
-                    marksFieldsContainer.innerHTML = ''; // Clear previous fields
+                    marksFieldsContainer.innerHTML = '';
 
                     try {
-                        // Fetch assignments for the student
                         const response = await fetch(`/students/marks/${studentId}`);
                         const data = await response.json();
                         const { studentName, assignments } = data;
 
-                        // Create input fields for each assignment
                         assignments.forEach(assignment => {
                             const fieldHTML = `
-        <div class="marks-row mb-3">
-            <label for="marks[${assignment.assignmentId}]">${assignment.title}</label>
-            <input type="number" name="marks[${assignment.assignmentId}]" class="form-control" 
-                value="${assignment.score}" placeholder="Enter marks">
-        </div>
-    `;
+                                <div class="marks-row mb-3">
+                                    <label for="marks[${assignment.assignmentId}]">${assignment.title}</label>
+                                    <input type="number" name="marks[${assignment.assignmentId}]" class="form-control" 
+                                        value="${assignment.score}" placeholder="Enter marks">
+                                </div>
+                            `;
                             marksFieldsContainer.insertAdjacentHTML('beforeend', fieldHTML);
                         });
 
-
+                        modal.show();
                     } catch (error) {
                         console.error("Error loading assignments or marks:", error);
                     }
-
-                    modal.show();
                 });
             });
 
@@ -169,7 +670,6 @@
                     console.error(error);
                 }
             });
-
         });
     </script>
 </body>

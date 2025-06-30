@@ -1,47 +1,520 @@
-<div class="container mt-4">
-    <h2>Student List</h2>
-    <a href="/students/add" class="btn btn-success mb-3">Add Student</a>
-    <a href="/students/bulk-update" class="btn btn-info mb-3">Bulk Update Students</a>
+<div class="container-fluid p-0 m-0 vh-100">
+    <!-- Header Section -->
+    <div class="welcome-section text-center">
+        <div class="container-fluid position-relative">
+            <a href="/" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Home</span>
+            </a>
+            <h1 class="display-4 mb-3">Student Dashboard</h1>
+            <p class="lead">Manage and track student progress</p>
+        </div>
+    </div>
 
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Roll No</th>
-                <th>Symbol No</th>
-                <th>Assignments</th>
-                <th>Average Score</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
+    <!-- Dashboard Content -->
+    <div class="container-fluid px-4">
+        <!-- Search and Filter Section -->
+        <div class="search-filter-section mb-4">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Search by name, roll no, or symbol no...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="scoreFilter">
+                        <option value="">Filter by Score Range</option>
+                        <option value="90-100">90-100% (Excellent)</option>
+                        <option value="80-89">80-89% (Good)</option>
+                        <option value="70-79">70-79% (Fair)</option>
+                        <option value="60-69">60-69% (Poor)</option>
+                        <option value="0-59">Below 60% (Fail)</option>
+                        <option value="no-score">No Score</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="assignmentFilter">
+                        <option value="">Filter by Assignments</option>
+                        <option value="5+">5+ Assignments</option>
+                        <option value="3-4">3-4 Assignments</option>
+                        <option value="1-2">1-2 Assignments</option>
+                        <option value="0">No Assignments</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-secondary w-100" id="resetFilters">
+                        <i class="fas fa-sync-alt me-2"></i>Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-end gap-3 mb-4">
+            <a href="/students/add" class="btn btn-primary">
+                <i class="fas fa-user-plus me-2"></i>Add Student
+            </a>
+            <a href="/students/bulk-update" class="btn btn-secondary">
+                <i class="fas fa-users me-2"></i>Bulk Update
+            </a>
+        </div>
+
+        <!-- Student Cards Grid -->
+        <div class="student-grid">
             {{#each students}}
-            <tr>
-                <td>{{this.name}}</td>
-                <td>{{this.roll_no}}</td>
-                <td>{{this.symbol_no}}</td>
-                <td>
-                    {{#each this.assignments}}
-                        {{this.score}} 
-                    {{else}}
-                        No assignments
-                    {{/each}}
-                </td>
-                <td>
-                    {{#if this.assignments.length}}
-                        {{average this.assignments}}
-                    {{else}}
-                        N/A
-                    {{/if}}
-                </td>
-                <td>
-                    <a href="/students/edit/{{this._id}}" class="btn btn-warning">Edit</a>
+            <div class="student-card" 
+                 data-name="{{this.name}}"
+                 data-roll="{{this.roll_no}}"
+                 data-symbol="{{this.symbol_no}}"
+                 data-score="{{#if this.assignments.length}}{{average this.assignments}}{{else}}0{{/if}}"
+                 data-assignments="{{this.assignments.length}}">
+                <div class="student-profile">
+                    <div class="profile-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div class="student-info">
+                        <h3 class="student-name">{{this.name}}</h3>
+                        <div class="student-details">
+                            <span class="detail-item">
+                                <i class="fas fa-id-card"></i>
+                                Roll No: {{this.roll_no}}
+                            </span>
+                            <span class="detail-item">
+                                <i class="fas fa-hashtag"></i>
+                                Symbol No: {{this.symbol_no}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="student-performance">
+                    <div class="performance-item">
+                        <span class="label">Assignments</span>
+                        <span class="value">{{this.assignments.length}}</span>
+                    </div>
+                    <div class="performance-item">
+                        <span class="label">Average Score</span>
+                        <span class="value score-badge {{#if this.assignments.length}}{{#if (gte (average this.assignments) 90)}}score-excellent{{else if (gte (average this.assignments) 80)}}score-good{{else if (gte (average this.assignments) 70)}}score-fair{{else if (gte (average this.assignments) 60)}}score-poor{{else}}score-fail{{/if}}{{/if}}">
+                            {{#if this.assignments.length}}
+                                {{average this.assignments}}%
+                            {{else}}
+                                N/A
+                            {{/if}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="student-actions">
+                    <a href="/students/view/{{this._id}}" class="btn btn-primary action-btn">
+                        <i class="fas fa-eye"></i>
+                        <span>View Profile</span>
+                    </a>
+                    <a href="/students/edit/{{this._id}}" class="btn btn-primary action-btn">
+                        <i class="fas fa-edit"></i>
+                        <span>Edit</span>
+                    </a>
                     <form action="/students/{{this._id}}?_method=DELETE" method="POST" class="d-inline">
-                        <button type="submit" class="btn btn-danger">Delete</button>
+                        <button type="submit" class="btn btn-primary action-btn" onclick="return confirm('Are you sure you want to delete this student?')">
+                            <i class="fas fa-trash"></i>
+                            <span>Delete</span>
+                        </button>
                     </form>
-                </td>
-            </tr>
+                </div>
+            </div>
             {{/each}}
-        </tbody>
-    </table>
+        </div>
+    </div>
 </div>
+
+<style>
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #3498db;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --info-color: #17a2b8;
+        --card-bg: #ffffff;
+        --text-primary: #2c3e50;
+        --text-secondary: #6c757d;
+        --border-color: rgba(0,0,0,0.1);
+        --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+        --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+        --shadow-lg: 0 8px 15px rgba(0,0,0,0.15);
+        --transition: all 0.3s ease;
+    }
+
+    .welcome-section {
+        background: var(--primary-color);
+        color: white;
+        padding: 4rem 0;
+        margin: 0;
+        width: 100%;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 3rem;
+    }
+
+    .back-button {
+        position: absolute;
+        right: 2rem;
+        top: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: var(--transition);
+        font-weight: 500;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .back-button:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateX(5px);
+        color: white;
+        text-decoration: none;
+    }
+
+    .student-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        padding: 1rem 0;
+    }
+
+    .student-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: var(--transition);
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .student-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .student-profile {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .profile-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(44, 62, 80, 0.05);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: var(--primary-color);
+    }
+
+    .student-info {
+        flex: 1;
+    }
+
+    .student-name {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .student-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+
+    .detail-item i {
+        color: var(--primary-color);
+        opacity: 0.8;
+    }
+
+    .student-performance {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        padding: 1rem;
+        background: rgba(44, 62, 80, 0.02);
+        border-radius: 8px;
+    }
+
+    .performance-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .performance-item .label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        letter-spacing: 0.5px;
+    }
+
+    .performance-item .value {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .student-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: auto;
+    }
+
+    .action-btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        border-radius: 8px;
+        transition: var(--transition);
+        font-size: 0.875rem;
+        font-weight: 500;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .action-btn i {
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .action-btn span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .search-filter-section {
+        background: var(--card-bg);
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+    }
+
+    .search-box {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 1rem;
+        color: var(--text-secondary);
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        transition: var(--transition);
+    }
+
+    .search-box input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1);
+    }
+
+    .form-select {
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        transition: var(--transition);
+        background-color: var(--card-bg);
+    }
+
+    .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1);
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        border: none;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #1a252f;
+        color: white;
+    }
+
+    .btn-secondary {
+        background: var(--secondary-color);
+        border: none;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #2980b9;
+        color: white;
+    }
+
+    .btn-outline-secondary {
+        border-color: var(--secondary-color);
+        color: var(--secondary-color);
+    }
+
+    .btn-outline-secondary:hover {
+        background: var(--secondary-color);
+        color: white;
+    }
+
+    .score-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+
+    .score-excellent {
+        background: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+    }
+
+    .score-good {
+        background: rgba(0, 123, 255, 0.1);
+        color: #007bff;
+    }
+
+    .score-fair {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+    }
+
+    .score-poor {
+        background: rgba(255, 152, 0, 0.1);
+        color: #ff9800;
+    }
+
+    .score-fail {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+    }
+
+    @media (max-width: 768px) {
+        .back-button {
+            position: static;
+            transform: none;
+            display: inline-flex;
+            margin-bottom: 1rem;
+            margin-top: 1rem;
+        }
+
+        .back-button:hover {
+            transform: translateX(5px);
+        }
+
+        .student-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .search-filter-section .row {
+            .student-actions {
+                flex-direction: column;
+            }
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const scoreFilter = document.getElementById('scoreFilter');
+        const assignmentFilter = document.getElementById('assignmentFilter');
+        const resetFilters = document.getElementById('resetFilters');
+        const studentCards = document.querySelectorAll('.student-card');
+
+        function filterStudents() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const scoreRange = scoreFilter.value;
+            const assignmentCount = assignmentFilter.value;
+
+            studentCards.forEach(card => {
+                const name = card.dataset.name.toLowerCase();
+                const roll = card.dataset.roll.toLowerCase();
+                const symbol = card.dataset.symbol.toLowerCase();
+                const score = parseFloat(card.dataset.score);
+                const assignments = parseInt(card.dataset.assignments);
+
+                let matchesSearch = name.includes(searchTerm) || 
+                                 roll.includes(searchTerm) || 
+                                 symbol.includes(searchTerm);
+
+                let matchesScore = true;
+                if (scoreRange) {
+                    if (scoreRange === 'no-score') {
+                        matchesScore = score === 0;
+                    } else {
+                        const [min, max] = scoreRange.split('-').map(Number);
+                        matchesScore = score >= min && score <= max;
+                    }
+                }
+
+                let matchesAssignments = true;
+                if (assignmentCount) {
+                    if (assignmentCount === '0') {
+                        matchesAssignments = assignments === 0;
+                    } else if (assignmentCount === '5+') {
+                        matchesAssignments = assignments >= 5;
+                    } else {
+                        const [min, max] = assignmentCount.split('-').map(Number);
+                        matchesAssignments = assignments >= min && assignments <= max;
+                    }
+                }
+
+                card.style.display = matchesSearch && matchesScore && matchesAssignments ? 'flex' : 'none';
+            });
+        }
+
+        // Add event listeners for real-time filtering
+        searchInput.addEventListener('input', filterStudents);
+        scoreFilter.addEventListener('change', filterStudents);
+        assignmentFilter.addEventListener('change', filterStudents);
+
+        // Reset all filters
+        resetFilters.addEventListener('click', function() {
+            searchInput.value = '';
+            scoreFilter.value = '';
+            assignmentFilter.value = '';
+            studentCards.forEach(card => card.style.display = 'flex');
+        });
+    });
+</script>

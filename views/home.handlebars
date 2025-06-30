@@ -1,70 +1,412 @@
-{{!-- views/home.handlebars --}}
-<div class="welcome-section text-center">
-    <h1 class="display-4 mb-3">Welcome to Student Evaluation System</h1>
-    <p class="lead">Manage your academic records efficiently</p>
-</div>
+<!DOCTYPE html>
+<html lang="en">
 
-<div class="container">
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="fas fa-users card-icon"></i>
-                    <h5 class="card-title">Manage Students</h5>
-                    <p class="card-text">Add, view, and manage student records with ease.</p>
-                    <a href="/students" class="btn btn-primary">
-                        <i class="fas fa-arrow-right me-2"></i>Go to Students
-                    </a>
-                </div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Evaluation System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/css/theme.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container-fluid p-0 m-0 vh-100">
+        <!-- Hero Section -->
+        <div class="welcome-section text-center">
+            <div class="container-fluid position-relative">
+                <h1 class="display-4 mb-3">Welcome to Student Evaluation System</h1>
+                <p class="lead">Manage your academic records efficiently</p>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="fas fa-tasks card-icon"></i>
-                    <h5 class="card-title">Manage Assignments</h5>
-                    <p class="card-text">Create and track student assignments efficiently.</p>
-                    <a href="/assignments" class="btn btn-primary">
-                        <i class="fas fa-arrow-right me-2"></i>Go to Assignments
-                    </a>
+
+        <!-- Quick Stats -->
+        <div class="container-fluid px-4">
+            <div class="row g-4 mb-4 mt-5">
+                <div class="col-md-3">
+                    <div class="stats-card" onclick="showCategory('students')">
+                        <i class="fas fa-users fa-2x mb-3"></i>
+                        <div class="stats-number">{{totalStudents}}</div>
+                        <div class="stats-label">Total Students</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card" onclick="showCategory('assignments')">
+                        <i class="fas fa-tasks fa-2x mb-3"></i>
+                        <div class="stats-number">{{totalAssignments}}</div>
+                        <div class="stats-label">Total Assignments</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card" onclick="showCategory('scores')">
+                        <i class="fas fa-chart-line fa-2x mb-3"></i>
+                        <div class="stats-number">{{averageScore}}%</div>
+                        <div class="stats-label">Average Score</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card" onclick="showCategory('courses')">
+                        <i class="fas fa-book fa-2x mb-3"></i>
+                        <div class="stats-number">{{totalCourses}}</div>
+                        <div class="stats-label">Total Courses</div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="fas fa-chart-bar card-icon"></i>
-                    <h5 class="card-title">Manage Marks</h5>
-                    <p class="card-text">View and update student grades with detailed analytics.</p>
-                    <a href="/marks" class="btn btn-primary">
-                        <i class="fas fa-arrow-right me-2"></i>Go to Marks
-                    </a>
+
+            <!-- Main Dashboard Content -->
+            <div class="row g-4">
+                <!-- Student Related Cards -->
+                <div class="col-md-4 student-cards">
+                    <div class="dashboard-card">
+                        <div class="card-body text-center p-4">
+                            <div class="card-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <h5 class="card-title">Manage Students</h5>
+                            <p class="card-text">Add, view, and manage student records with ease.</p>
+                            <a href="/students" class="btn btn-primary">
+                                <i class="fas fa-arrow-right me-2"></i>Go to Students
+                            </a>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="fas fa-clock card-icon"></i>
-                    <h5 class="card-title">Pending Assignments</h5>
-                    <p class="card-text">Track pending assignments and their due dates.</p>
-                    <a href="/students/assignments" class="btn btn-primary">
-                        <i class="fas fa-arrow-right me-2"></i>View Pending
-                    </a>
+
+                <!-- Assignment Related Cards -->
+                <div class="col-md-4 assignment-cards">
+                    <div class="dashboard-card">
+                        <div class="card-body text-center p-4">
+                            <div class="card-icon">
+                                <i class="fas fa-tasks"></i>
+                            </div>
+                            <h5 class="card-title">Manage Assignments</h5>
+                            <p class="card-text">Create and track student assignments efficiently.</p>
+                            <a href="/assignments" class="btn btn-primary">
+                                <i class="fas fa-arrow-right me-2"></i>Go to Assignments
+                            </a>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="fas fa-book card-icon"></i>
-                    <h5 class="card-title">Manage Courses</h5>
-                    <p class="card-text">Organize courses and study materials effectively.</p>
-                    <a href="/courses" class="btn btn-primary">
-                        <i class="fas fa-arrow-right me-2"></i>Go to Courses
-                    </a>
+                <div class="col-md-4 assignment-cards">
+                    <div class="dashboard-card">
+                        <div class="card-body text-center p-4">
+                            <div class="card-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <h5 class="card-title">Pending Assignments</h5>
+                            <p class="card-text">Track pending assignments and their due dates.</p>
+                            <a href="/students/assignments" class="btn btn-primary">
+                                <i class="fas fa-arrow-right me-2"></i>View Pending
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Score Related Cards -->
+                <div class="col-md-4 score-cards">
+                    <div class="dashboard-card">
+                        <div class="card-body text-center p-4">
+                            <div class="card-icon">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <h5 class="card-title">Manage Marks</h5>
+                            <p class="card-text">View and update student grades with detailed analytics.</p>
+                            <a href="/marks" class="btn btn-primary">
+                                <i class="fas fa-arrow-right me-2"></i>Go to Marks
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Related Cards -->
+                <div class="col-md-4 course-cards">
+                    <div class="dashboard-card">
+                        <div class="card-body text-center p-4">
+                            <div class="card-icon">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <h5 class="card-title">Manage Courses</h5>
+                            <p class="card-text">Organize courses and study materials effectively.</p>
+                            <a href="/courses" class="btn btn-primary">
+                                <i class="fas fa-arrow-right me-2"></i>Go to Courses
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #6c757d;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 8px 15px rgba(0, 0, 0, 0.15);
+            --transition: all 0.3s ease;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .container-fluid {
+            width: 100%;
+            padding-right: 0;
+            padding-left: 0;
+            margin-right: 0;
+            margin-left: 0;
+        }
+
+        .welcome-section {
+            background: var(--primary-color);
+            color: white;
+            padding: 4rem 0;
+            margin: 0;
+            width: 100%;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 3rem;
+        }
+
+        .welcome-section h1 {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .welcome-section .lead {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .stats-card {
+            background: var(--card-bg);
+            text-align: center;
+            padding: 2rem;
+            border-radius: 12px;
+            transition: var(--transition);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stats-card i {
+            color: var(--primary-color);
+            opacity: 0.8;
+        }
+
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+            color: var(--primary-color);
+        }
+
+        .stats-label {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .dashboard-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            height: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(44, 62, 80, 0.05);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2rem;
+            color: var(--primary-color);
+            transition: var(--transition);
+        }
+
+        .dashboard-card:hover .card-icon {
+            transform: scale(1.1);
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .card-title {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .card-text {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            background: var(--primary-color);
+        }
+
+        /* Category-specific styles */
+        .student-cards .card-icon {
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .student-cards .card-icon i {
+            color: #3498db;
+        }
+
+        .student-cards:hover .card-icon {
+            background: #3498db;
+        }
+
+        .assignment-cards .card-icon {
+            background: rgba(241, 196, 15, 0.1);
+        }
+
+        .assignment-cards .card-icon i {
+            color: #f1c40f;
+        }
+
+        .assignment-cards:hover .card-icon {
+            background: #f1c40f;
+        }
+
+        .score-cards .card-icon {
+            background: rgba(46, 204, 113, 0.1);
+        }
+
+        .score-cards .card-icon i {
+            color: #2ecc71;
+        }
+
+        .score-cards:hover .card-icon {
+            background: #2ecc71;
+        }
+
+        .course-cards .card-icon {
+            background: rgba(155, 89, 182, 0.1);
+        }
+
+        .course-cards .card-icon i {
+            color: #9b59b6;
+        }
+
+        .course-cards:hover .card-icon {
+            background: #9b59b6;
+        }
+
+        @media (max-width: 768px) {
+            .welcome-section {
+                padding: 3rem 0;
+            }
+
+            .welcome-section h1 {
+                font-size: 2rem;
+            }
+
+            .stats-card {
+                padding: 1.5rem;
+            }
+
+            .stats-number {
+                font-size: 2rem;
+            }
+        }
+    </style>
+
+    <script>
+        function showCategory(category) {
+            // Hide all cards first
+            document.querySelectorAll('.student-cards, .assignment-cards, .score-cards, .course-cards').forEach(card => {
+                card.style.display = 'none';
+            });
+
+            // Show cards based on category
+            switch (category) {
+                case 'students':
+                    document.querySelectorAll('.student-cards').forEach(card => {
+                        card.style.display = 'block';
+                    });
+                    break;
+                case 'assignments':
+                    document.querySelectorAll('.assignment-cards').forEach(card => {
+                        card.style.display = 'block';
+                    });
+                    break;
+                case 'scores':
+                    document.querySelectorAll('.score-cards').forEach(card => {
+                        card.style.display = 'block';
+                    });
+                    break;
+                case 'courses':
+                    document.querySelectorAll('.course-cards').forEach(card => {
+                        card.style.display = 'block';
+                    });
+                    break;
+            }
+
+            // Scroll to the cards section
+            document.querySelector('.row.g-4').scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+
+        // Show all cards by default
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.student-cards, .assignment-cards, .score-cards, .course-cards').forEach(card => {
+                card.style.display = 'block';
+            });
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

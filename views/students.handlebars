@@ -1,50 +1,573 @@
-<h2>Student Marksheet</h2>
-<table class="table">
-    <tr>
-        <th>Name</th>
-        <th>Roll No</th>
-        <th>Symbol No</th>
-        <th>Assignments</th>
-        <th>Average Score</th>
-        <th>Actions</th>
-    </tr>
-    {{#each students}}
-    <tr>
-        <td>{{this.name}}</td>
-        <td>{{this.roll_no}}</td>
-        <td>{{this.symbol_no}}</td>
-        <td>
-            <table>
-                {{#each this.assignments}}
-                <tr>
-                    <td>{{this.name}}</td>
-                    <td>
-                        <form action="/assignments/update/{{this._id}}" method="POST">
-                            <select name="score" onchange="this.form.submit()">
-                                <option value="0" {{#if (eq this.score 0)}}selected{{/if}}>0</option>
-                                <option value="25" {{#if (eq this.score 25)}}selected{{/if}}>25</option>
-                                <option value="50" {{#if (eq this.score 50)}}selected{{/if}}>50</option>
-                                <option value="75" {{#if (eq this.score 75)}}selected{{/if}}>75</option>
-                                <option value="100" {{#if (eq this.score 100)}}selected{{/if}}>100</option>
-                            </select>
-                        </form>
-                    </td>
-                </tr>
-                {{/each}}
-            </table>
-        </td>
-        <td>
-            {{#if this.assignments.length}}
-                {{average this.assignments}}
-            {{else}}
-                N/A
-            {{/if}}
-        </td>
-        <td>
-            <a href="/students/edit/{{this._id}}" class="btn btn-warning">Edit</a>
-            <a href="/students/delete/{{this._id}}" class="btn btn-danger">Delete</a>
-        </td>
-    </tr>
-    {{/each}}
-</table>
-<a href="/students/add" class="btn btn-primary">Add Student</a>
+<div class="container-fluid dashboard-container">
+    <!-- Header Section -->
+    <div class="welcome-section text-center">
+        <h1 class="display-4 mb-3">Student Performance Dashboard</h1>
+        <p class="lead">Track and analyze student progress in real-time</p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stats-card stats-card-primary">
+                <div class="stats-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-number" id="totalStudents">0</div>
+                    <div class="stats-label">Total Students</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card stats-card-success">
+                <div class="stats-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-number" id="avgScore">0%</div>
+                    <div class="stats-label">Average Score</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card stats-card-warning">
+                <div class="stats-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-number" id="topPerformers">0</div>
+                    <div class="stats-label">Top Performers</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card stats-card-info">
+                <div class="stats-icon">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-number" id="totalAssignments">0</div>
+                    <div class="stats-label">Total Assignments</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row">
+        <!-- Student List -->
+        <div class="col-md-8">
+            <div class="card dashboard-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list me-2"></i>Student Overview
+                    </h5>
+                    <div class="d-flex gap-2">
+                        <div class="input-group search-box">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="searchInput" placeholder="Search students...">
+                        </div>
+                        <select class="form-select score-filter" id="scoreFilter">
+                            <option value="">All Scores</option>
+                            <option value="high">High (75-100)</option>
+                            <option value="medium">Medium (50-74)</option>
+                            <option value="low">Low (0-49)</option>
+                        </select>
+                        <a href="/students/add" class="btn btn-primary add-student-btn">
+                            <i class="fas fa-user-plus me-2"></i>Add Student
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="student-grid">
+                        {{#each students}}
+                        <div class="student-card" data-score="{{average this.assignments}}">
+                            <div class="student-header">
+                                <div class="avatar-circle">
+                                    {{initials this.name}}
+                                </div>
+                                <div class="student-info">
+                                    <h6 class="mb-0">{{this.name}}</h6>
+                                    <small class="text-muted">Roll No: {{this.roll_no}}</small>
+                                </div>
+                                <div class="student-score">
+                                    {{#if this.assignments.length}}
+                                        <div class="score-indicator {{#if (gte (average this.assignments) 75)}}score-high{{else if (gte (average this.assignments) 50)}}score-medium{{else}}score-low{{/if}}">
+                                            <i class="fas fa-chart-line me-1"></i>
+                                            {{average this.assignments}}%
+                                        </div>
+                                    {{else}}
+                                        <span class="text-muted">N/A</span>
+                                    {{/if}}
+                                </div>
+                            </div>
+                            <div class="student-assignments">
+                                {{#each this.assignments}}
+                                <div class="assignment-item">
+                                    <div class="assignment-header">
+                                        <div class="assignment-name">
+                                            <i class="fas fa-tasks me-2"></i>
+                                            {{this.name}}
+                                        </div>
+                                        <form action="/assignments/update/{{this._id}}" method="POST" class="mb-0">
+                                            <select name="score" class="form-select form-select-sm score-select" onchange="this.form.submit()">
+                                                <option value="0" {{#if (eq this.score 0)}}selected{{/if}}>0</option>
+                                                <option value="25" {{#if (eq this.score 25)}}selected{{/if}}>25</option>
+                                                <option value="50" {{#if (eq this.score 50)}}selected{{/if}}>50</option>
+                                                <option value="75" {{#if (eq this.score 75)}}selected{{/if}}>75</option>
+                                                <option value="100" {{#if (eq this.score 100)}}selected{{/if}}>100</option>
+                                            </select>
+                                        </form>
+                                    </div>
+                                    <div class="progress-container">
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" style="width: {{this.score}}%" 
+                                                 aria-valuenow="{{this.score}}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <span class="progress-value">{{this.score}}%</span>
+                                    </div>
+                                </div>
+                                {{/each}}
+                            </div>
+                            <div class="student-actions">
+                                <a href="/students/edit/{{this._id}}" class="btn btn-sm btn-outline-primary action-btn" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="/students/delete/{{this._id}}" class="btn btn-sm btn-outline-danger action-btn" 
+                                   onclick="return confirm('Are you sure you want to delete this student?')" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {{/each}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Sidebar -->
+        <div class="col-md-4">
+            <div class="card dashboard-card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Score Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="scoreDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card dashboard-card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Performance Trend
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="performanceTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dashboard-container {
+        padding: 2rem;
+    }
+
+    .welcome-section {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        padding: 3rem 0;
+        margin: -2rem -2rem 2rem -2rem;
+        border-radius: 0 0 10px 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .dashboard-card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .stats-card {
+        display: flex;
+        align-items: center;
+        padding: 1.5rem;
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .stats-card-primary { background: linear-gradient(135deg, rgba(44, 62, 80, 0.1) 0%, rgba(44, 62, 80, 0.05) 100%); }
+    .stats-card-success { background: linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, rgba(40, 167, 69, 0.05) 100%); }
+    .stats-card-warning { background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%); }
+    .stats-card-info { background: linear-gradient(135deg, rgba(23, 162, 184, 0.1) 0%, rgba(23, 162, 184, 0.05) 100%); }
+
+    .stats-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.5rem;
+    }
+
+    .stats-card-primary .stats-icon { background-color: rgba(44, 62, 80, 0.2); color: var(--primary-color); }
+    .stats-card-success .stats-icon { background-color: rgba(40, 167, 69, 0.2); color: var(--success-color); }
+    .stats-card-warning .stats-icon { background-color: rgba(255, 193, 7, 0.2); color: var(--warning-color); }
+    .stats-card-info .stats-icon { background-color: rgba(23, 162, 184, 0.2); color: var(--info-color); }
+
+    .stats-number {
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 0.5rem 0;
+    }
+
+    .stats-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .student-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+        padding: 1.5rem;
+    }
+
+    .student-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .student-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    }
+
+    .student-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    }
+
+    .student-header {
+        display: flex;
+        align-items: center;
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+        background: linear-gradient(135deg, rgba(44, 62, 80, 0.05) 0%, rgba(44, 62, 80, 0.02) 100%);
+    }
+
+    .avatar-circle {
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 18px;
+        margin-right: 1rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .student-info {
+        flex: 1;
+    }
+
+    .student-info h6 {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: var(--primary-color);
+    }
+
+    .student-score {
+        margin-left: 1rem;
+    }
+
+    .score-indicator {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .student-assignments {
+        padding: 1.5rem;
+        background: rgba(0,0,0,0.02);
+    }
+
+    .assignment-item {
+        margin-bottom: 1.5rem;
+        padding: 1.25rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease;
+    }
+
+    .assignment-item:hover {
+        transform: translateX(5px);
+    }
+
+    .assignment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .assignment-name {
+        font-weight: 500;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+    }
+
+    .progress-container {
+        position: relative;
+    }
+
+    .progress {
+        height: 10px;
+        border-radius: 5px;
+        background-color: rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        transition: width 0.6s ease;
+    }
+
+    .progress-value {
+        position: absolute;
+        right: 0;
+        top: -20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--primary-color);
+    }
+
+    .score-select {
+        min-width: 80px;
+        border-radius: 20px;
+        border: 1px solid rgba(0,0,0,0.1);
+        background: white;
+        padding: 0.25rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .student-actions {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid rgba(0,0,0,0.1);
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        background: rgba(0,0,0,0.02);
+    }
+
+    .action-btn {
+        padding: 0.5rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .action-btn.btn-outline-primary:hover {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .action-btn.btn-outline-danger:hover {
+        background: var(--danger-color);
+        color: white;
+    }
+
+    .search-box {
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .score-filter {
+        border-radius: 20px;
+        border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .add-student-btn {
+        border-radius: 20px;
+        padding: 0.5rem 1.5rem;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 250px;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize statistics
+        const students = {{{json students}}};
+        const totalStudents = students.length;
+        const totalAssignments = students.reduce((acc, student) => acc + (student.assignments?.length || 0), 0);
+        const avgScore = students.reduce((acc, student) => {
+            if (student.assignments?.length) {
+                return acc + student.assignments.reduce((sum, ass) => sum + ass.score, 0) / student.assignments.length;
+            }
+            return acc;
+        }, 0) / (students.filter(s => s.assignments?.length).length || 1);
+        const topPerformers = students.filter(student => {
+            if (!student.assignments?.length) return false;
+            const avg = student.assignments.reduce((sum, ass) => sum + ass.score, 0) / student.assignments.length;
+            return avg >= 75;
+        }).length;
+
+        // Update statistics
+        document.getElementById('totalStudents').textContent = totalStudents;
+        document.getElementById('totalAssignments').textContent = totalAssignments;
+        document.getElementById('avgScore').textContent = Math.round(avgScore) + '%';
+        document.getElementById('topPerformers').textContent = topPerformers;
+
+        // Score Distribution Chart
+        const scoreRanges = {
+            '0-24': 0,
+            '25-49': 0,
+            '50-74': 0,
+            '75-100': 0
+        };
+
+        students.forEach(student => {
+            if (student.assignments?.length) {
+                const avg = student.assignments.reduce((sum, ass) => sum + ass.score, 0) / student.assignments.length;
+                if (avg >= 75) scoreRanges['75-100']++;
+                else if (avg >= 50) scoreRanges['50-74']++;
+                else if (avg >= 25) scoreRanges['25-49']++;
+                else scoreRanges['0-24']++;
+            }
+        });
+
+        new Chart(document.getElementById('scoreDistributionChart'), {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(scoreRanges),
+                datasets: [{
+                    data: Object.values(scoreRanges),
+                    backgroundColor: [
+                        '#dc3545',
+                        '#fd7e14',
+                        '#ffc107',
+                        '#28a745'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Performance Trend Chart
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+        const performanceData = months.map(() => Math.floor(Math.random() * 30) + 70);
+
+        new Chart(document.getElementById('performanceTrendChart'), {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: 'Average Score',
+                    data: performanceData,
+                    borderColor: '#2c3e50',
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(44, 62, 80, 0.1)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 50,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        // Search and Filter functionality
+        const searchInput = document.getElementById('searchInput');
+        const scoreFilter = document.getElementById('scoreFilter');
+        const studentCards = document.querySelectorAll('.student-card');
+
+        function filterStudents() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const scoreFilterValue = scoreFilter.value;
+
+            studentCards.forEach(card => {
+                const name = card.querySelector('.student-info h6').textContent.toLowerCase();
+                const score = parseFloat(card.dataset.score) || 0;
+                let showCard = name.includes(searchTerm);
+
+                if (scoreFilterValue) {
+                    if (scoreFilterValue === 'high' && score < 75) showCard = false;
+                    if (scoreFilterValue === 'medium' && (score < 50 || score >= 75)) showCard = false;
+                    if (scoreFilterValue === 'low' && score >= 50) showCard = false;
+                }
+
+                card.style.display = showCard ? '' : 'none';
+            });
+        }
+
+        searchInput.addEventListener('input', filterStudents);
+        scoreFilter.addEventListener('change', filterStudents);
+    });
+</script>

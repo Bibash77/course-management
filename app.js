@@ -47,8 +47,36 @@ app.engine(
             
                 if (daysRemaining < 0) return 0; // Return 0 if the due date has already passed
                 return daysRemaining;
-            }
+            },
+
+            // Add comparison helpers
+            lt(a, b) {
+                return a < b;
+            },
             
+            gt(a, b) {
+                return a > b;
+            },
+
+            gte(a, b) {
+                return a >= b;
+            },
+            
+            eq(a, b) {
+                return a === b;
+            },
+
+            truncate(str, length) {
+                if (str && str.length > length) {
+                    return str.substring(0, length) + '...';
+                }
+                return str;
+            },
+
+            stripTags(str) {
+                if (!str) return '';
+                return str.replace(/<[^>]*>/g, '');
+            }
         }
     })
 );

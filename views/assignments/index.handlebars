@@ -1,30 +1,829 @@
-<div class="container mt-4">
-    <h2>Assignments</h2>
-    <a href="/assignments/add" class="btn btn-primary mb-3">Add Assignment</a>
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Description</th>
-                <th>Due Date</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{#each assignments}}
-            <tr>
-                <td>{{this.title}}</td>
-                <!-- Render HTML for description -->
-                <td>{{{this.description}}}</td> <!-- Use triple braces to render raw HTML -->
-                <td>{{this.dueDate}}</td>
-                <td>
-                    <a href="/assignments/edit/{{this._id}}" class="btn btn-warning btn-sm">Edit</a>
-                    <form action="/assignments/delete/{{this._id}}?_method=DELETE" method="POST" style="display:inline;">
-                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                    </form>
-                </td>
-            </tr>
-            {{/each}}
-        </tbody>
-    </table>
+<div class="container-fluid p-0 m-0 vh-100">
+    <!-- Header Section -->
+    <div class="welcome-section text-center">
+        <div class="container-fluid position-relative">
+            <a href="/" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Home</span>
+            </a>
+            <h1 class="display-4 mb-3">Assignment Dashboard</h1>
+            <p class="lead">Track and manage all assignments in one place</p>
+        </div>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div class="container-fluid px-4">
+        <!-- Quick Stats -->
+        <div class="row g-4 mb-4 mt-5">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-tasks fa-2x mb-3"></i>
+                    <div class="stats-number">{{assignments.length}}</div>
+                    <div class="stats-label">Total Assignments</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-check-circle fa-2x mb-3"></i>
+                    <div class="stats-number">{{completedCount}}</div>
+                    <div class="stats-label">Completed</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-clock fa-2x mb-3"></i>
+                    <div class="stats-number">{{upcomingCount}}</div>
+                    <div class="stats-label">Upcoming</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-exclamation-circle fa-2x mb-3"></i>
+                    <div class="stats-number">{{overdueCount}}</div>
+                    <div class="stats-label">Overdue</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard Content -->
+        <div class="row">
+            <!-- Assignment List -->
+            <div class="col-lg-8">
+                <div class="card dashboard-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-list me-2"></i>Assignment Overview
+                        </h5>
+                        <a href="/assignments/add" class="btn btn-primary add-assignment-btn">
+                            <i class="fas fa-plus me-2"></i>Add Assignment
+                        </a>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="assignment-grid">
+                            {{#each assignments}}
+                            <div class="assignment-card" onclick="showDescription('{{this._id}}')">
+                                <div class="assignment-header">
+                                    <div class="assignment-title">
+                                        <i class="fas fa-tasks me-2"></i>
+                                        {{this.title}}
+                                    </div>
+                                    <div class="assignment-actions">
+                                        <a href="/assignments/edit/{{this._id}}" class="btn btn-sm btn-outline-primary action-btn" title="Edit" onclick="event.stopPropagation();">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form action="/assignments/delete/{{this._id}}?_method=DELETE" method="POST" class="d-inline" onclick="event.stopPropagation();">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger action-btn" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="assignment-content">
+                                    <div class="assignment-description">
+                                        {{#if this.description}}
+                                            {{truncate (stripTags this.description) 150}}
+                                        {{else}}
+                                            <span class="text-muted">No description provided</span>
+                                        {{/if}}
+                                    </div>
+                                    <div class="assignment-footer">
+                                        <div class="due-date">
+                                            <i class="fas fa-calendar-alt me-2"></i>
+                                            Due: {{formatDate this.dueDate}}
+                                        </div>
+                                        <div class="days-left {{#if (lt (daysLeft this.dueDate) 3)}}text-danger{{else if (lt (daysLeft this.dueDate) 7)}}text-warning{{else}}text-success{{/if}}">
+                                            <i class="fas fa-clock me-2"></i>
+                                            {{daysLeft this.dueDate}} days left
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Description Popup -->
+                            <div class="description-popup" id="popup-{{this._id}}">
+                                <div class="popup-content">
+                                    <div class="popup-header">
+                                        <h5 class="popup-title">
+                                            <i class="fas fa-tasks me-2"></i>
+                                            {{this.title}}
+                                        </h5>
+                                        <button class="close-popup" onclick="closeDescription('{{this._id}}')">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="popup-body">
+                                        <div class="description-section">
+                                            <h6>Description</h6>
+                                            <div class="description-content">
+                                                {{{this.description}}}
+                                            </div>
+                                        </div>
+                                        <div class="info-section">
+                                            <div class="info-item">
+                                                <i class="fas fa-calendar-alt me-2"></i>
+                                                <span>Due Date: {{formatDate this.dueDate}}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <i class="fas fa-clock me-2"></i>
+                                                <span>Time Remaining: {{daysLeft this.dueDate}} days</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <i class="fas fa-info-circle me-2"></i>
+                                                <span>Status: 
+                                                    {{#if (lt (daysLeft this.dueDate) 0)}}
+                                                        <span class="badge bg-danger">Overdue</span>
+                                                    {{else if (lt (daysLeft this.dueDate) 3)}}
+                                                        <span class="badge bg-warning">Urgent</span>
+                                                    {{else if (lt (daysLeft this.dueDate) 7)}}
+                                                        <span class="badge bg-info">Upcoming</span>
+                                                    {{else}}
+                                                        <span class="badge bg-success">On Track</span>
+                                                    {{/if}}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="popup-footer">
+                                        <a href="/assignments/edit/{{this._id}}" class="btn btn-primary">
+                                            <i class="fas fa-edit me-2"></i>Edit Assignment
+                                        </a>
+                                        <button class="btn btn-secondary" onclick="closeDescription('{{this._id}}')">
+                                            Close
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {{/each}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Calendar Widget -->
+                <div class="card dashboard-card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-calendar me-2"></i>Upcoming Deadlines
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="upcoming-deadlines">
+                            {{#each assignments}}
+                                {{#if (lt (daysLeft this.dueDate) 7)}}
+                                <div class="deadline-item">
+                                    <div class="deadline-date">
+                                        <span class="day">{{formatDate this.dueDate "DD"}}</span>
+                                        <span class="month">{{formatDate this.dueDate "MMM"}}</span>
+                                    </div>
+                                    <div class="deadline-info">
+                                        <div class="deadline-title">{{this.title}}</div>
+                                        <div class="deadline-time">{{daysLeft this.dueDate}} days left</div>
+                                    </div>
+                                </div>
+                                {{/if}}
+                            {{/each}}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Widget -->
+                <div class="card dashboard-card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-pie me-2"></i>Assignment Progress
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #3498db;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --info-color: #17a2b8;
+        --card-bg: #ffffff;
+        --text-primary: #2c3e50;
+        --text-secondary: #6c757d;
+        --border-color: rgba(0,0,0,0.1);
+        --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+        --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+        --shadow-lg: 0 8px 15px rgba(0,0,0,0.15);
+        --transition: all 0.3s ease;
+    }
+
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .container-fluid {
+        width: 100%;
+        padding-right: 0;
+        padding-left: 0;
+        margin-right: 0;
+        margin-left: 0;
+    }
+
+    .welcome-section {
+        background: var(--primary-color);
+        color: white;
+        padding: 4rem 0;
+        margin: 0;
+        width: 100%;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 3rem;
+    }
+
+    .dashboard-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+    }
+
+    .dashboard-card:hover {
+        box-shadow: var(--shadow-lg);
+    }
+
+    .card-header {
+        background: var(--card-bg);
+        border-bottom: 1px solid var(--border-color);
+        padding: 1.25rem;
+    }
+
+    .assignment-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        padding: 1.5rem;
+    }
+
+    .assignment-card-link {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .assignment-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+        overflow: hidden;
+        height: 200px;
+        display: flex;
+        flex-direction: column;
+        cursor: pointer;
+    }
+
+    .assignment-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .assignment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.25rem;
+        background: var(--card-bg);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .assignment-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        font-size: 1.1rem;
+    }
+
+    .assignment-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .action-btn {
+        padding: 0.5rem;
+        border-radius: 10px;
+        transition: var(--transition);
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border-color);
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .action-btn.btn-outline-primary:hover {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .action-btn.btn-outline-danger:hover {
+        background: var(--danger-color);
+        color: white;
+    }
+
+    .assignment-content {
+        padding: 1.25rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .assignment-description {
+        margin-bottom: 1rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
+        flex-grow: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        max-height: 4.8em;
+    }
+
+    .assignment-description .text-muted {
+        font-style: italic;
+    }
+
+    .assignment-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+        margin-top: auto;
+    }
+
+    .due-date, .days-left {
+        display: flex;
+        align-items: center;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .days-left.text-danger { color: var(--danger-color); }
+    .days-left.text-warning { color: var(--warning-color); }
+    .days-left.text-success { color: var(--success-color); }
+
+    .upcoming-deadlines {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .deadline-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background: rgba(44, 62, 80, 0.02);
+        border-radius: 10px;
+        transition: var(--transition);
+    }
+
+    .deadline-item:hover {
+        background: rgba(44, 62, 80, 0.05);
+    }
+
+    .deadline-date {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: var(--primary-color);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        margin-right: 1rem;
+        min-width: 60px;
+    }
+
+    .deadline-date .day {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .deadline-date .month {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+    }
+
+    .deadline-info {
+        flex-grow: 1;
+    }
+
+    .deadline-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .deadline-time {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .stats-card {
+        background: var(--card-bg);
+        text-align: center;
+        padding: 2rem;
+        border-radius: 12px;
+        transition: var(--transition);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+        color: var(--primary-color);
+    }
+
+    .stats-label {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .stats-card i {
+        color: var(--primary-color);
+        opacity: 0.8;
+    }
+
+    .modal-content {
+        border: none;
+        border-radius: 15px;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, rgba(44, 62, 80, 0.05) 0%, rgba(44, 62, 80, 0.02) 100%);
+        border-bottom: 1px solid var(--border-color);
+        padding: 1.25rem;
+    }
+
+    .modal-title {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .detail-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .detail-label {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+
+    .detail-content {
+        color: var(--text-primary);
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+
+    .badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.875rem;
+    }
+
+    .modal-footer {
+        border-top: 1px solid var(--border-color);
+        padding: 1.25rem;
+    }
+
+    .modal-footer .btn {
+        padding: 0.5rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+
+    .description-popup {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        overflow-y: auto;
+        padding: 2rem 0;
+    }
+
+    .description-popup.active {
+        display: flex;
+    }
+
+    .popup-content {
+        background: var(--card-bg);
+        border-radius: 12px;
+        width: 90%;
+        max-width: 800px;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+    }
+
+    .popup-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.25rem;
+        border-bottom: 1px solid var(--border-color);
+        position: sticky;
+        top: 0;
+        background: var(--card-bg);
+        z-index: 1;
+    }
+
+    .popup-title {
+        margin: 0;
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .close-popup {
+        background: none;
+        border: none;
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 0.5rem;
+        transition: var(--transition);
+    }
+
+    .close-popup:hover {
+        color: var(--danger-color);
+        transform: rotate(90deg);
+    }
+
+    .popup-body {
+        padding: 1.5rem;
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    .description-section {
+        margin-bottom: 2rem;
+    }
+
+    .description-section h6 {
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 1rem;
+        position: sticky;
+        top: 0;
+        background: var(--card-bg);
+        padding: 0.5rem 0;
+        z-index: 1;
+    }
+
+    .description-content {
+        color: var(--text-primary);
+        line-height: 1.6;
+        white-space: pre-wrap;
+        max-height: 50vh;
+        overflow-y: auto;
+        padding: 0.5rem;
+        background: rgba(44, 62, 80, 0.02);
+        border-radius: 8px;
+    }
+
+    .info-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        padding: 1rem;
+        background: rgba(44, 62, 80, 0.02);
+        border-radius: 8px;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        color: var(--text-secondary);
+    }
+
+    .info-item i {
+        color: var(--primary-color);
+        font-size: 1.1rem;
+    }
+
+    .popup-footer {
+        padding: 1.25rem;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        position: sticky;
+        bottom: 0;
+        background: var(--card-bg);
+        z-index: 1;
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        background: var(--primary-color);
+    }
+
+    .btn-secondary {
+        background: var(--text-secondary);
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        background: var(--text-secondary);
+    }
+
+    @media (max-width: 1200px) {
+        .assignment-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .assignment-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .description-popup {
+            padding: 1rem 0;
+        }
+
+        .popup-content {
+            width: 95%;
+            margin: 0;
+            max-height: 95vh;
+        }
+
+        .description-content {
+            max-height: 40vh;
+        }
+
+        .info-section {
+            grid-template-columns: 1fr;
+        }
+
+        .back-button {
+            position: static;
+            transform: none;
+            display: inline-flex;
+            margin-bottom: 1rem;
+            margin-top: 1rem;
+        }
+
+        .back-button:hover {
+            transform: translateX(5px);
+        }
+    }
+
+    .back-button {
+        position: absolute;
+        right: 2rem;
+        top: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: var(--transition);
+        font-weight: 500;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .back-button:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateX(5px);
+        color: white;
+        text-decoration: none;
+    }
+
+    .back-button i {
+        font-size: 1.1rem;
+    }
+</style>
+
+<script>
+    function showDescription(id) {
+        document.getElementById(`popup-${id}`).classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDescription(id) {
+        document.getElementById(`popup-${id}`).classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    // Close popup when clicking outside
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('description-popup')) {
+            e.target.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+
+    // Initialize chart
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('progressChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Completed', 'Upcoming', 'Overdue'],
+                datasets: [{
+                    data: [{{completedCount}}, {{upcomingCount}}, {{overdueCount}}],
+                    backgroundColor: [
+                        'rgba(40, 167, 69, 0.8)',
+                        'rgba(255, 193, 7, 0.8)',
+                        'rgba(220, 53, 69, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(40, 167, 69, 1)',
+                        'rgba(255, 193, 7, 1)',
+                        'rgba(220, 53, 69, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+    });
+</script>
